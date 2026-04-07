@@ -1,0 +1,25 @@
+vocab-ai-bot/
+│
+├── app.py                (Flask app)
+├── models/
+│   ├── word_model.pkl
+│   ├── user_model.pkl
+│
+├── data/
+│   ├── words.csv
+│   ├── user_logs.csv
+│
+├── templates/
+│   ├── index.html
+│
+├── static/
+│   ├── style.css
+│   ├── script.js
+│
+├── ml/
+│   ├── train_word_model.py
+│   ├── train_user_model.py
+│
+└── utils/
+    ├── nlp_api.py
+    ├── feature_engineering.py
