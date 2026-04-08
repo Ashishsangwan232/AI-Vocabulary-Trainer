@@ -1,14 +1,18 @@
-import requests
+from app import create_app
 
-url = "http://127.0.0.1:5000/get_word"
 
-data = {
-    "accuracy": 0.7,
-    "avg_time": 4,
-    "attempts": 2,
-    "streak": 3
-}
+def run_smoke_test():
+    app = create_app()
+    client = app.test_client()
 
-response = requests.post(url, json=data)
+    word_response = client.post("/get_word", json={"user_id": "test_user"})
+    print("POST /get_word status:", word_response.status_code)
+    print("POST /get_word body:", word_response.get_json())
 
-print(response.json())
+    progress_response = client.get("/progress", query_string={"user_id": "test_user"})
+    print("GET /progress status:", progress_response.status_code)
+    print("GET /progress body:", progress_response.get_json())
+
+
+if __name__ == "__main__":
+    run_smoke_test()

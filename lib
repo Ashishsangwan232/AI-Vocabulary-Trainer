@@ -1,4 +1,5 @@
-pip install flask joblib pandas (inside virtual env)
-
-
-venv/scripts/activate
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python test.py
+python main.py
