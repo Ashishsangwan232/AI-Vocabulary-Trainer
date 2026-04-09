@@ -1,3 +1,4 @@
+from app.api.admin_routes import admin_bp
 from pathlib import Path
 
 from flask import Flask
@@ -5,7 +6,7 @@ from flask_cors import CORS
 
 from app.core.config import Config
 from app.db.database import db
-
+from app.api.auth_routes import auth_bp
 
 def create_app():
     app = Flask(__name__)
@@ -23,7 +24,8 @@ def create_app():
 
     # app.register_blueprint(word_bp)
     # app.register_blueprint(user_bp)
-
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(word_bp, url_prefix="/api/words")
     app.register_blueprint(user_bp, url_prefix="/api/users")
 

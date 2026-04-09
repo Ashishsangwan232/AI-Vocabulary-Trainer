@@ -3,7 +3,7 @@ import re
 from app.core.logger import logger
 
 try:
-    from nlp_api import generate_word_content, evaluate_answer
+    from app.services.nlp_api import generate_word_content, evaluate_answer
 except ModuleNotFoundError:
     generate_word_content = None
     evaluate_answer = None
@@ -40,10 +40,6 @@ def _fallback_evaluate_answer(word, meaning, answer):
 
 def generate_word_data(difficulty, level, word):
     llm_content = None
-
-
-    
-
     if generate_word_content is not None:
         try:
             llm_content = generate_word_content(difficulty, word=word)

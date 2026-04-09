@@ -1,5 +1,5 @@
+from app.db.models import UserHistory 
 from flask import Blueprint, jsonify, request
-
 from app.db.models import UserStats
 
 user_bp = Blueprint("user", __name__)
@@ -39,3 +39,22 @@ def progress():
         "streak": int(user.streak or 0),
         "trend": trend # New field for frontend visualization
     })
+
+
+@user_bp.route("/history", methods=["GET"])
+def get_history():
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    
+    history = UserHistory.query.filter_by(user_id=user_id).order_by(UserHistory.timestamp.desc()).limit(50).all()
+    
+    results = []
+    for item in history:
+        results.append({
+            "word": item.word,
+            "is_correct": item.is_correct,
+            "timestamp": item.timestamp.strftime("%b %d, %Y - %I:%M %p")
+        })
+        
+    return jsonify(results), 200
