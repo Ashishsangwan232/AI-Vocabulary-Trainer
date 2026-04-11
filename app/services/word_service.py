@@ -70,6 +70,33 @@ def _load_words_df():
 #     return generate_word_data(difficulty, normalized_level, str(word))
 
 
+def select_word_ml(df, target_difficulty):
+    sample_df = df.sample(100)  # sample subset for speed
+
+    feature_cols = ["length", "vowels", "unique_chars", "syllables", "bigram_rarity", "familiarity"]
+
+    candidates = []
+
+    for _, row in sample_df.iterrows():
+        features = pd.DataFrame([[
+            row.get("length", 0),
+            row.get("vowels", 0),
+            row.get("unique_chars", 0),
+            row.get("syllables", 0),
+            row.get("bigram_rarity", 0),
+            row.get("familiarity", 0)
+        ]], columns=feature_cols)
+
+        pred = predict_word_difficulty(features)
+
+        if pred == target_difficulty:
+            candidates.append(row["word"])
+
+    if candidates:
+        return random.choice(candidates)
+
+    return random.choice(sample_df["word"].values)
+
 def get_word_for_user(user_id):
     user_features = get_user_features(user_id)
     df = _load_words_df()
@@ -83,9 +110,11 @@ def get_word_for_user(user_id):
     mapping = {"beginner": "easy", "intermediate": "medium", "advanced": "hard"}
     difficulty = mapping.get(normalized_level, "easy")
 
-    filtered = df[df["difficulty"].astype(str).str.lower() == difficulty]
-    word = random.choice(filtered["word"].values) if len(filtered) > 0 else "resilient"
-
+    # filtered = df[df["difficulty"].astype(str).str.lower() == difficulty]
+    # word = random.choice(filtered["word"].values) if len(filtered) > 0 else "resilient"
+    filtered = df  # use full dataset
+    
+    word = select_word_ml(filtered, difficulty)
     # Generate the content via LLM
     word_data = generate_word_data(difficulty, normalized_level, str(word))
     
