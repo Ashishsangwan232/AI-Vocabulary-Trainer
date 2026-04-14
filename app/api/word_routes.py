@@ -12,16 +12,17 @@ from app.db.models import UserStats, NLPWord, TriviaFact
 
 word_bp = Blueprint("word", __name__)
 
-
 @word_bp.route("/get_word", methods=["GET"])
 def get_word():
-    payload = request.get_json(silent=True) or {}
-    user_id = payload.get("user_id", "student_01")
+    # ⚠️ CRITICAL FIX: GET requests do not have JSON bodies. Read from URL args!
+    user_id = request.args.get("user_id")
 
-    if not isinstance(user_id, str) or not user_id.strip():
-        return jsonify({"error": "user_id must be a non-empty string"}), 400
+    # Fallback just in case
+    if not user_id or not user_id.strip():
+        user_id = "student_01"
 
     try:
+        # Now it will actually calculate the ML score for the logged-in user!
         result = get_word_for_user(user_id.strip())
     except Exception:
         logger.exception(

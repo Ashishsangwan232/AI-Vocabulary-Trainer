@@ -1,15 +1,13 @@
 from pathlib import Path
-import warnings
-
 import joblib
-
 from app.core.logger import logger
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-MODELS_DIR = BASE_DIR / "models"
 
 _word_model = None
 _word_le = None
+_user_model = None
+_user_le = None
 
 
 def load_word_model():
@@ -19,35 +17,41 @@ def load_word_model():
         return True
 
     try:
-        _word_model = joblib.load(MODELS_DIR / "word_model.pkl")
-        _word_le = joblib.load(MODELS_DIR / "label_encoder.pkl")
+        _word_model = joblib.load("models/word_model.pkl")
+        _word_le = joblib.load("models/label_encoder.pkl")
+        logger.info("Word model loaded successfully")
         return True
-    except Exception:
-        logger.warning("Word model not loaded, fallback to random.")
+    except Exception as e:
+        logger.warning(f"Word model not loaded: {e}")
         return False
 
 
-# def predict_user_level(features):
-#     if _load_user_model_assets():
-#         try:
-#             level_encoded = _user_model.predict(features)
-#             return str(_user_le.inverse_transform(level_encoded)[0]).lower()
-#         except Exception:
-#             logger.exception("Model prediction failed. Falling back to heuristics.")
+def load_user_model():
+    global _user_model, _user_le
 
-#     # Fallback: infer user level from basic metrics.
-#     row = features.iloc[0]
-#     accuracy = float(row.get("accuracy", 0.0))
-#     attempts = float(row.get("attempts", 0.0))
-#     streak = float(row.get("streak", 0.0))
+    if _user_model is not None:
+        return True
 
-#     if accuracy >= 0.85 and attempts >= 30 and streak >= 5:
-#         return "advanced"
-#     if accuracy >= 0.6 and attempts >= 10:
-#         return "intermediate"
-#     return "beginner"
+    try:
+        _user_model = joblib.load("models/user_model.pkl")
+        _user_le = joblib.load("models/user_label_encoder.pkl")
+        logger.info("User model loaded successfully")
+        return True
+    except Exception as e:
+        logger.warning(f"User model not loaded: {e}")
+        return False
 
 
+def predict_user_level(features_df):
+    if load_user_model():
+        try:
+            pred = _user_model.predict(features_df)
+            return _user_le.inverse_transform(pred)[0]
+        except Exception:
+            logger.exception("User prediction failed")
+
+    return "beginner" 
+    
 def predict_word_difficulty(features_df):
     if load_word_model():
         try:
